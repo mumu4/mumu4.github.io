@@ -17,7 +17,7 @@ document.getElementById('predictBtn').addEventListener('click', () => {
 
     resultDiv.innerText = 'Обработка...';
 
-    fetch('https://x6ktkg-46-146-234-187.ru.tuna.am/predict', { // замените URL, если нужно
+    fetch('http://127.0.0.1:4040/predict', { // замените URL, если нужно
         method: 'POST',
         body: formData
     })
