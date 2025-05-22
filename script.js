@@ -1,37 +1,35 @@
-<input type="file" id="audioFile" accept="audio/*">
-<button id="predictBtn">Предсказать</button>
-<div id="result"></div>
+// URL вашего локального сервера Flask (замените при необходимости)
+const SERVER_URL = 'https://x6ktkg-46-146-234-187.ru.tuna.am/predict';
 
-<script>
-document.getElementById('predictBtn').addEventListener('click', () => {
-    const fileInput = document.getElementById('audioFile');
-    const resultDiv = document.getElementById('result');
+document.addEventListener('DOMContentLoaded', () => {
+  const fileInput = document.getElementById('audioFile');
+  const submitBtn = document.getElementById('submitBtn');
+  const resultDiv = document.getElementById('result');
 
-    if (fileInput.files.length === 0) {
-        resultDiv.innerText = 'Пожалуйста, выберите аудиофайл.';
-        return;
+  submitBtn.addEventListener('click', () => {
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('Пожалуйста, выберите аудиофайл.');
+      return;
     }
 
     const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
+    formData.append('audio', file);
 
-    resultDiv.innerText = 'Обработка...';
-
-    fetch('http://127.0.0.1:4040/predict', { // замените URL, если нужно
-        method: 'POST',
-        body: formData
+    fetch(SERVER_URL, {
+      method: 'POST',
+      body: formData,
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            resultDiv.innerText = 'Ошибка: ' + data.error;
-        } else {
-            resultDiv.innerText = 'Предсказание: ' + data.prediction;
+      .then(response => response.json())
+      .then(data => {
+        if (data.prediction) {
+          resultDiv.innerHTML = `Предсказание: <strong>${data.prediction}</strong>`;
+        } else if (data.error) {
+          resultDiv.innerHTML = `Ошибка: ${data.error}`;
         }
-    })
-    .catch(error => {
-        console.error('Ошибка:', error);
-        resultDiv.innerText = 'Произошла ошибка при отправке запроса.';
-    });
+      })
+      .catch(error => {
+        resultDiv.innerHTML = `Ошибка при отправке запроса: ${error}`;
+      });
+  });
 });
-</script>
