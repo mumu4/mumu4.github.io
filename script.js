@@ -41,7 +41,7 @@ document.getElementById('predictBtn').addEventListener('click', () => {
   const formData = new FormData();
   formData.append('file', fileInput.files[0]);
 
-  fetch('https://mumu4.github.io', {
+  fetch('https://http://127.0.0.1:5000', {
     // замените на ваш URL сервера при деплое
     method: 'POST',
     body: formData,
