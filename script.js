@@ -1,26 +1,37 @@
-// Предположим, у вас есть элемент <input type="file" id="audioInput">
-const inputElement = document.getElementById('audioInput');
+<input type="file" id="audioFile" accept="audio/*">
+<button id="predictBtn">Предсказать</button>
+<div id="result"></div>
 
-inputElement.addEventListener('change', () => {
-  const file = inputElement.files[0];
-  if (!file) return;
+<script>
+document.getElementById('predictBtn').addEventListener('click', () => {
+    const fileInput = document.getElementById('audioFile');
+    const resultDiv = document.getElementById('result');
 
-  const formData = new FormData();
-  formData.append('audio', file);
+    if (fileInput.files.length === 0) {
+        resultDiv.innerText = 'Пожалуйста, выберите аудиофайл.';
+        return;
+    }
 
-  // Замените YOUR_PUBLIC_IP_OR_DNS:PORT на ваш публичный IP или DNS + порт
-  const url = 'https://93gvmm-46-146-234-187.ru.tuna.am/predict';
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
 
-  fetch(url, {
-    method: 'POST',
-    body: formData,
-  })
-  .then(response => response.json())
-  .then(data => {
-    alert('Результат: ' + data.prediction);
-  })
-  .catch(error => {
-    console.error('Ошибка:', error);
-    alert('Ошибка при отправке запроса');
-  });
+    resultDiv.innerText = 'Обработка...';
+
+    fetch('https://x6ktkg-46-146-234-187.ru.tuna.am/predict', { // замените URL, если нужно
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            resultDiv.innerText = 'Ошибка: ' + data.error;
+        } else {
+            resultDiv.innerText = 'Предсказание: ' + data.prediction;
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        resultDiv.innerText = 'Произошла ошибка при отправке запроса.';
+    });
 });
+</script>
