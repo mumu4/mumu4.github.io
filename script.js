@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDiv = document.getElementById('result');
     
     // Убедитесь, что URL заканчивается на /predict и использует HTTPS
-    const SERVER_URL = 'https://purple-lands-serve.loca.lt/predict';
+    const SERVER_URL = 'https://full-teams-behave.loca.lt/predict';
     
     predictBtn.addEventListener('click', async () => {
         if (!audioFileInput.files.length) {
