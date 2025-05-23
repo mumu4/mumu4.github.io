@@ -1,4 +1,4 @@
-const SERVER_URL = 'https://slimy-sites-send.loca.lt/predict';
+const SERVER_URL = 'https://afraid-kids-speak.loca.lt/predict';
 
 async function sendAudioToServer(file) {
     const formData = new FormData();
