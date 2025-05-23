@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDiv = document.getElementById('result');
     
     // URL вашего сервера через localtunnel/ngrok (замените на ваш)
-    const SERVER_URL = 'https://late-monkeys-cut.loca.lt/predict';
+    const SERVER_URL = 'https://purple-lands-serve.loca.lt/predict';
     
     predictBtn.addEventListener('click', async () => {
         if (!audioFileInput.files.length) {
