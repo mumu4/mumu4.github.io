@@ -1,35 +1,35 @@
-// URL вашего локального сервера Flask (замените при необходимости)
-const SERVER_URL = 'https://x6ktkg-46-146-234-187.ru.tuna.am/predict';
+document.getElementById('sendBtn').addEventListener('click', () => {
+    const input = document.getElementById('audioFile');
+    const resultPara = document.getElementById('result'); // элемент для отображения результата
 
-document.addEventListener('DOMContentLoaded', () => {
-  const fileInput = document.getElementById('audioFile');
-  const submitBtn = document.getElementById('submitBtn');
-  const resultDiv = document.getElementById('result');
-
-  submitBtn.addEventListener('click', () => {
-    const file = fileInput.files[0];
-    if (!file) {
-      alert('Пожалуйста, выберите аудиофайл.');
-      return;
+    if (input.files.length === 0) {
+        alert('Пожалуйста, выберите аудиофайл.');
+        return;
     }
 
+    const file = input.files[0];
+
+    // Создаем FormData и добавляем файл
     const formData = new FormData();
     formData.append('audio', file);
 
-    fetch(SERVER_URL, {
-      method: 'POST',
-      body: formData,
+    // Отправляем POST-запрос на сервер
+    fetch('https://breezy-comics-deny.loca.lt/process_audio', {
+        method: 'POST',
+        body: formData
     })
-      .then(response => response.json())
-      .then(data => {
+    .then(response => response.json())
+    .then(data => {
         if (data.prediction) {
-          resultDiv.innerHTML = `Предсказание: <strong>${data.prediction}</strong>`;
+            resultPara.textContent = 'Предсказание: ' + data.prediction;
         } else if (data.error) {
-          resultDiv.innerHTML = `Ошибка: ${data.error}`;
+            resultPara.textContent = 'Ошибка: ' + data.error;
+        } else {
+            resultPara.textContent = 'Неизвестная ошибка.';
         }
-      })
-      .catch(error => {
-        resultDiv.innerHTML = `Ошибка при отправке запроса: ${error}`;
-      });
-  });
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        resultPara.textContent = 'Произошла ошибка при отправке запроса.';
+    });
 });
