@@ -1,18 +1,78 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Определитель голоса</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>Audio Classifier</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        #result { margin-top: 20px; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <h1>Определитель голоса: человек или робот</h1>
-    <input type="file" id="audioFile" accept="audio/*" />
-    <button id="predictBtn">Определить</button>
+    <h1>Audio Classifier</h1>
+    <p>Record audio to check if it's human or robot:</p>
+    
+    <button id="recordBtn">Start Recording</button>
     <div id="result"></div>
 
-    <!-- Подключение скрипта -->
-    <script src="script.js"></script>
+    <script>
+        const recordBtn = document.getElementById('recordBtn');
+        const resultDiv = document.getElementById('result');
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Укажи URL из LocalTunnel (замени на свой)
+        const SERVER_URL = 'https://your-subdomain.loca.lt/predict';
+
+        recordBtn.addEventListener('click', async () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                recordBtn.textContent = 'Start Recording';
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    await sendAudioToServer(audioBlob);
+                };
+
+                mediaRecorder.start();
+                recordBtn.textContent = 'Stop Recording';
+                resultDiv.textContent = 'Recording...';
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                resultDiv.textContent = 'Error accessing microphone';
+            }
+        });
+
+        async function sendAudioToServer(audioBlob) {
+            resultDiv.textContent = 'Analyzing...';
+
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+
+            try {
+                const response = await fetch(SERVER_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                resultDiv.textContent = `Result: ${data.result}`;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.textContent = 'Error analyzing audio';
+            }
+        }
+    </script>
 </body>
 </html>
