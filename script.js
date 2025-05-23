@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const predictBtn = document.getElementById('predictBtn');
     const resultDiv = document.getElementById('result');
     
-    // URL вашего сервера через localtunnel/ngrok (замените на ваш)
+    // Убедитесь, что URL заканчивается на /predict и использует HTTPS
     const SERVER_URL = 'https://purple-lands-serve.loca.lt/predict';
     
     predictBtn.addEventListener('click', async () => {
@@ -12,64 +12,70 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        const audioFile = audioFileInput.files[0];
-        
         try {
             showResult('Анализируем аудио...', 'processing');
             
-            // Создаем FormData и добавляем файл
-            const formData = new FormData();
-            formData.append('audio', audioFile);
-            
-            // Отправляем на сервер
-            const response = await fetch(SERVER_URL, {
-                method: 'POST',
-                body: formData
+            // Специальная обработка для Opera GX
+            const file = audioFileInput.files[0];
+            const renamedFile = new File([file], 'audio_record.wav', {
+                type: file.type,
+                lastModified: file.lastModified
             });
             
-            if (!response.ok) {
-                throw new Error(`Ошибка сервера: ${response.status}`);
-            }
+            const formData = new FormData();
+            formData.append('audio', renamedFile);
+            
+            // Добавляем заголовки для CORS
+            const response = await fetch(SERVER_URL, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                },
+                mode: 'cors'
+            });
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             const data = await response.json();
-            
-            // Форматируем результат
-            let resultHTML = `
-                <div class="result-box">
-                    <h2>Результат:</h2>
-                    <p class="prediction">Это <strong>${data.prediction === 'human' ? 'человек' : 'робот'}</strong></p>
-                    <p class="confidence">Уверенность: ${(data.confidence * 100).toFixed(2)}%</p>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${data.confidence * 100}%"></div>
-                    </div>
-                    <details>
-                        <summary>Подробности</summary>
-                        <p>Вероятность человека: ${(data.probabilities.human * 100).toFixed(2)}%</p>
-                        <p>Вероятность робота: ${(data.probabilities.robot * 100).toFixed(2)}%</p>
-                    </details>
-                </div>
-            `;
-            
-            showResult(resultHTML, 'success');
+            displayResults(data);
             
         } catch (error) {
-            console.error('Ошибка:', error);
-            showResult(`Произошла ошибка: ${error.message}`, 'error');
+            console.error('Fetch error:', error);
+            showResult(`Ошибка: ${error.message}`, 'error');
         }
     });
     
-    function showResult(message, type) {
-        resultDiv.innerHTML = typeof message === 'string' ? message : message;
-        resultDiv.className = type;
+    function displayResults(data) {
+        const isHuman = data.prediction === 'human';
+        resultDiv.innerHTML = `
+            <div class="result-card ${isHuman ? 'human' : 'robot'}">
+                <h2>Результат анализа:</h2>
+                <p class="verdict">${isHuman ? '👤 Человек' : '🤖 Робот'}</p>
+                <div class="confidence">
+                    <span>Уверенность:</span>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${data.confidence * 100}%"></div>
+                    </div>
+                    <span>${(data.confidence * 100).toFixed(1)}%</span>
+                </div>
+                <button id="detailsBtn">Подробнее</button>
+                <div class="details" id="detailsPanel">
+                    <p>Вероятность человека: ${(data.probabilities.human * 100).toFixed(1)}%</p>
+                    <p>Вероятность робота: ${(data.probabilities.robot * 100).toFixed(1)}%</p>
+                </div>
+            </div>
+        `;
         
-        // Автоматически скрыть сообщение об ошибке через 5 сек
-        if (type === 'error') {
-            setTimeout(() => {
-                if (resultDiv.className === 'error') {
-                    resultDiv.textContent = '';
-                    resultDiv.className = '';
-                }
-            }, 5000);
-        }
+        // Обработка кнопки подробностей
+        document.getElementById('detailsBtn')?.addEventListener('click', () => {
+            const panel = document.getElementById('detailsPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        });
+    }
+    
+    function showResult(message, type) {
+        resultDiv.innerHTML = message;
+        resultDiv.className = `result-${type}`;
     }
 });
