@@ -1,4 +1,4 @@
-const SERVER_URL = 'https://full-teams-behave.loca.lt/predict';
+const SERVER_URL = 'https://slimy-sites-send.loca.lt/predict';
 
 async function sendAudioToServer(file) {
     const formData = new FormData();
