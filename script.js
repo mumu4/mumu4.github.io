@@ -1,4 +1,4 @@
-const SERVER_URL = 'https://afraid-kids-speak.loca.lt/predict';
+const SERVER_URL = 'https://plv80w-46-146-234-187.ru.tuna.am/predict';
 
 async function sendAudioToServer(file) {
     const formData = new FormData();
